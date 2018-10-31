@@ -10,7 +10,7 @@ import utils.Reader;
 public class XMLMessages {
 
     public static ArrayList<Message> messages = new ArrayList<>();
-    static String PERSISTENCE = "messages.xml";
+    static String PERSISTENCE = "messages_test.xml";
 
     public static void main(String[] args) {
         // Menu variables
@@ -26,6 +26,7 @@ public class XMLMessages {
                 "\n*** Messages ***\n"
                 + "1 - Check my messages\n"
                 + "2 - Send message\n"
+                + "3 - Delete message\n"
                 + "0 - Exit\n"
                 + "****************"
             );
@@ -37,8 +38,8 @@ public class XMLMessages {
                     menuOption = Reader.nextInt();
                     switch (menuOption) {
                         case 1: // CHECK MESSAGES
-                            System.out.println("Whose messages? (name)");
-                            checkMessages(Reader.nextString());
+                            System.out.println("Whose messages? (your name)");
+                            showMessages(Reader.nextString(), false);
                             break;
                         case 2: // SEND MESSAGE
                             System.out.println("Who's this coming from? (your name)");
@@ -47,8 +48,18 @@ public class XMLMessages {
                             String receiver = Reader.nextString();
                             System.out.println("Type the message");
                             String txt = Reader.nextLine();
-                            
+
                             sendMessage(sender, receiver, txt);
+                            break;
+                        case 3: // DELETE MESSAGE
+                            System.out.println("Whose message? (your name)");
+                            sender = Reader.nextString();
+                            showMessages(sender, true);
+
+                            System.out.println("Choose the message to delete");
+                            int messageIndex = Reader.nextInt();
+
+                            deleteMessage(messages.get(messageIndex));
                             break;
                         case 0: // EXIT
                             exit = true;
@@ -57,26 +68,46 @@ public class XMLMessages {
                             System.out.println("Invalid option selected. Choose a valid one!");
                             validOption = false;
                     }
-                } catch (IOException e) {
+                } catch (IOException | NullPointerException e) {
                     System.out.println(e.getMessage());
                 }
             } while (!validOption);
         }
     }
-    
-    static void checkMessages(String sender) {
-        System.out.println("\n>> " + sender + "'s messages:");
+
+    static ArrayList<Message> getMessagesBySender(String sender) {
+        ArrayList<Message> messagesFromSender = new ArrayList<>();
         for (Message message : messages) {
             if (message.getSender().equalsIgnoreCase(sender)) {
-                System.out.println(message);
-                System.out.println();
+                messagesFromSender.add(message);
+            }
+        }
+
+        return messagesFromSender;
+    }
+
+    static void showMessages(String sender, boolean indexed) {
+        ArrayList<Message> messages = getMessagesBySender(sender);
+
+        System.out.println("\n>> " + sender + "'s messages:");
+        if (indexed) {
+            for (Message message : messages) {
+                System.out.println(messages.indexOf(message) + 1 + ".\n" + message.toString() + "\n");
+            }
+        } else {
+            for (Message message : messages) {
+                System.out.println(message + "\n");
             }
         }
     }
-    
+
     static void sendMessage(String sender, String receiver, String text) {
         Message message = new Message(sender, receiver, text, "today", "now");
         messages.add(message);
         Persistence.writeMessage(message);
+    }
+
+    static void deleteMessage(Message message) {
+        messages.remove(message);
     }
 }
