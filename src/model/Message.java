@@ -50,4 +50,11 @@ public class Message {
     public void setTime(String time) {
         this.time = time;
     }
+
+    @Override
+    public String toString() {
+        return "To: " + receiver + "\n"
+            + date + " " + time + "\n"
+            + text;
+    }
 }

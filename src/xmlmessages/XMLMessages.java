@@ -1,6 +1,7 @@
 
 package xmlmessages;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import model.Message;
 import persistence.Persistence;
@@ -31,13 +32,23 @@ public class XMLMessages {
 
             do {
                 validOption = true;
-                menuOption = Reader.nextInt();
 
                 try {
+                    menuOption = Reader.nextInt();
                     switch (menuOption) {
                         case 1: // CHECK MESSAGES
+                            System.out.println("Whose messages? (name)");
+                            checkMessages(Reader.nextString());
                             break;
                         case 2: // SEND MESSAGE
+                            System.out.println("Who's this coming from? (your name)");
+                            String sender = Reader.nextString();
+                            System.out.println("Who to? (receiver's name)");
+                            String receiver = Reader.nextString();
+                            System.out.println("Type the message");
+                            String txt = Reader.nextLine();
+                            
+                            sendMessage(sender, receiver, txt);
                             break;
                         case 0: // EXIT
                             exit = true;
@@ -46,10 +57,26 @@ public class XMLMessages {
                             System.out.println("Invalid option selected. Choose a valid one!");
                             validOption = false;
                     }
-                } catch (NullPointerException e) {
+                } catch (IOException e) {
                     System.out.println(e.getMessage());
                 }
             } while (!validOption);
         }
+    }
+    
+    static void checkMessages(String sender) {
+        System.out.println("\n>> " + sender + "'s messages:");
+        for (Message message : messages) {
+            if (message.getSender().equalsIgnoreCase(sender)) {
+                System.out.println(message);
+                System.out.println();
+            }
+        }
+    }
+    
+    static void sendMessage(String sender, String receiver, String text) {
+        Message message = new Message(sender, receiver, text, "today", "now");
+        messages.add(message);
+        Persistence.writeMessage(message);
     }
 }
